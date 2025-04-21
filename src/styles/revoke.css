@@ -1,0 +1,116 @@
+.revoke-container {
+  padding: 30px;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-left: 130px; /* Matches sidebar width */
+  
+}
+
+.revoke-container h2 {
+  margin-bottom: 25px;
+  font-size: 28px;
+  color: #1a1a1a;
+  text-align: center;
+}
+
+.revoke-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+  justify-content: center;
+}
+
+.revoke-card {
+  width: 155%;
+   max-width: 2000px; 
+  padding: 20px 30px;
+  border-radius: 12px;
+  background-color: #d9d9d9; /* light grey like in screenshot */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.revoke-card-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 16px;
+}
+
+.revoke-card-header p {
+  margin: 0;
+  color: #333;
+}
+
+.status-text {
+  font-weight: bold;
+  margin-left: auto;
+  padding: 8px 16px;
+  border-radius: 20px;
+  background-color: #eee;
+  color: #555;
+}
+
+.accepted {
+  background-color: #d4edda;
+  color: #2e7d32;
+}
+
+.declined {
+  background-color: #f8d7da;
+  color: #c62828;
+}
+
+.button-group {
+  margin-top: 60px;
+  display: flex;
+  gap: 12px;
+}
+
+.accept-btn,
+.decline-btn {
+  padding: 8px 18px;
+  border: none;
+  border-radius: 30px;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.accept-btn {
+  background-color: #4caf50;
+}
+
+.decline-btn {
+  background-color: #f44336;
+}
+
+/* Pending badge */
+.revoke-card::after {
+  content: "Pending";
+  position: absolute;
+  top: 14px;
+  right: 20px;
+  background-color: #f28b82;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Hide pending badge if status is resolved */
+.revoke-card.accepted::after,
+.revoke-card.declined::after {
+  display: none;
+}
