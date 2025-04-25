@@ -14,6 +14,8 @@ import CancelIcon from "@mui/icons-material/Cancel";
 
 const Revoke = () => {
   const [complaints, setComplaints] = useState([]);
+  const [filteredComplaints, setFilteredComplaints] = useState([]);
+  const [filter, setFilter] = useState("All");
   const [modalOpen, setModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState({ icon: null, message: "" });
 
@@ -21,12 +23,26 @@ const Revoke = () => {
     fetchComplaints();
   }, []);
 
+  useEffect(() => {
+    applyFilter();
+  }, [complaints, filter]);
+
   const fetchComplaints = async () => {
     try {
       const response = await axios.get("http://localhost:5000/api/revoked");
       setComplaints(response.data);
     } catch (err) {
       console.error("Error fetching complaints:", err);
+    }
+  };
+
+  const applyFilter = () => {
+    if (filter === "All") {
+      setFilteredComplaints(complaints);
+    } else if (filter === "Pending") {
+      setFilteredComplaints(complaints.filter((c) => !c.STATUS_));
+    } else {
+      setFilteredComplaints(complaints.filter((c) => c.STATUS_ === filter));
     }
   };
 
@@ -43,7 +59,7 @@ const Revoke = () => {
         message: `Complaint ${status}!`,
       });
       setModalOpen(true);
-      fetchComplaints(); // Refresh
+      fetchComplaints();
     } catch (err) {
       console.error("Error updating status:", err);
     }
@@ -52,11 +68,20 @@ const Revoke = () => {
   return (
     <div className="revoke-container">
       <h2>Revoked Complaints</h2>
+
+      {/* Filter Buttons */}
+      <div className="filter-buttons">
+        <button className={filter === "All" ? "active" : ""} onClick={() => setFilter("All")}>All</button>
+        <button className={filter === "Accepted" ? "active" : ""} onClick={() => setFilter("Accepted")}>Accepted</button>
+        <button className={filter === "Declined" ? "active" : ""} onClick={() => setFilter("Declined")}>Declined</button>
+        <button className={filter === "Pending" ? "active" : ""} onClick={() => setFilter("Pending")}>Pending</button>
+      </div>
+
       <div className="revoke-grid">
-        {complaints.map((complaint) => (
+        {filteredComplaints.map((complaint) => (
           <div
             key={complaint.Roll_no}
-            className={`revoke-card ${complaint.STATUS_?.toLowerCase()}`}
+            className={`revoke-card ${complaint.STATUS_?.toLowerCase() || "pending"}`}
           >
             <div className="revoke-card-header">
               <p><strong>Name:</strong> {complaint.S_name}</p>
