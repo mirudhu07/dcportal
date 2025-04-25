@@ -10,6 +10,8 @@ import AssignmentIcon from "@mui/icons-material/Assignment";
 import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
 import BlockIcon from "@mui/icons-material/Block";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
+import ForwardToInboxIcon from "@mui/icons-material/ForwardToInbox";
+
 import "../../styles/sidebar.css";
 
 const Sidebar = ({ onSelect }) => {
@@ -17,6 +19,7 @@ const Sidebar = ({ onSelect }) => {
     { text: "Logger", icon: <AssignmentIcon />, page: "logger" },
     { text: "Mentor", icon: <SupervisorAccountIcon />, page: "mentor" },
     { text: "Revoke", icon: <BlockIcon />, page: "revoke" },
+    { text: "Forward", icon: <ForwardToInboxIcon />, page: "forward" },
     { text: "Logout", icon: <ExitToAppIcon />, page: "logout" },
   ];
 

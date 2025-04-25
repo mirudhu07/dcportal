@@ -96,7 +96,7 @@
 }
 
 /* Pending badge */
-.revoke-card::after {
+ .revoke-card::after {
   content: "Pending";
   position: absolute;
   top: 14px;
@@ -108,9 +108,35 @@
   font-size: 13px;
   font-weight: 600;
 }
-
+ 
 /* Hide pending badge if status is resolved */
 .revoke-card.accepted::after,
 .revoke-card.declined::after {
   display: none;
+}
+.modal-icon {
+  font-size: 64px;
+  animation: pop 0.4s ease-out forwards;
+}
+
+.modal-icon.accepted {
+  color: #4caf50;
+}
+
+.modal-icon.declined {
+  color: #f44336;
+}
+
+@keyframes pop {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
 }

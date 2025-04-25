@@ -1,5 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { Button, TextField, Box, Typography } from "@mui/material";
+import {
+  Button,
+  TextField,
+  Box,
+  Typography,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+} from "@mui/material";
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import useFacultyStore from "../../store/useFscultyStore";
 
 const Logger = () => {
@@ -17,6 +28,9 @@ const Logger = () => {
   const [venue, setVenue] = useState("");
 
   const [showForm, setShowForm] = useState(false);
+
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalData, setModalData] = useState({ success: true, message: "" });
 
   useEffect(() => {
     fetchStudents();
@@ -44,7 +58,8 @@ const Logger = () => {
 
   const handleSubmit = () => {
     if (!facultyName || !timeDate || !comment || !venue) {
-      alert("All fields are required");
+      setModalData({ success: false, message: "All fields are required" });
+      setModalOpen(true);
       return;
     }
 
@@ -57,6 +72,9 @@ const Logger = () => {
       venue,
     });
 
+    setModalData({ success: true, message: "Log created successfully!" });
+    setModalOpen(true);
+
     // Reset form
     setSID("");
     setStudentName("");
@@ -68,15 +86,17 @@ const Logger = () => {
   };
 
   return (
-    <Box sx={{ p: 3, 
-      maxWidth: 600, 
-      mx: "auto",
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      marginLeft: "250px"
-      }}>
-      
+    <Box
+      sx={{
+        p: 3,
+        maxWidth: 600,
+        mx: "auto",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        marginLeft: "250px",
+      }}
+    >
       {!showForm && (
         <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
           <Button
@@ -98,14 +118,12 @@ const Logger = () => {
             borderRadius: "5px",
             backgroundColor: "white",
             boxShadow: 3,
-            
           }}
         >
           <Typography variant="h5" sx={{ mb: 2 }}>
             Create Log Entry
           </Typography>
 
-          {/* Search Student */}
           <TextField
             label="Search Student"
             fullWidth
@@ -140,13 +158,9 @@ const Logger = () => {
             </Box>
           )}
 
-          {/* Register Number */}
           <TextField label="Register Number" fullWidth value={SID} disabled sx={{ mb: 2 }} />
-
-          {/* Student Name */}
           <TextField label="Student Name" fullWidth value={studentName} disabled sx={{ mb: 2 }} />
 
-          {/* Faculty Name */}
           <TextField
             label="Faculty Name"
             fullWidth
@@ -154,8 +168,6 @@ const Logger = () => {
             onChange={(e) => setFacultyName(e.target.value)}
             sx={{ mb: 2 }}
           />
-
-          {/* Date & Time */}
           <TextField
             type="datetime-local"
             fullWidth
@@ -163,8 +175,6 @@ const Logger = () => {
             onChange={(e) => setTimeDate(e.target.value)}
             sx={{ mb: 2 }}
           />
-
-          {/* Comment */}
           <TextField
             label="Comment"
             multiline
@@ -174,8 +184,6 @@ const Logger = () => {
             onChange={(e) => setComment(e.target.value)}
             sx={{ mb: 2 }}
           />
-
-          {/* Venue */}
           <TextField
             label="Venue"
             fullWidth
@@ -184,7 +192,6 @@ const Logger = () => {
             sx={{ mb: 2 }}
           />
 
-          {/* Submit & Cancel */}
           <Box sx={{ display: "flex", justifyContent: "space-between" }}>
             <Button variant="contained" color="primary" onClick={handleSubmit}>
               Submit
@@ -195,6 +202,28 @@ const Logger = () => {
           </Box>
         </Box>
       )}
+
+      {/* Modal */}
+      <Dialog open={modalOpen} onClose={() => setModalOpen(false)}>
+        <DialogTitle>Status</DialogTitle>
+        <DialogContent sx={{ textAlign: "center" }}>
+          {modalData.success ? (
+            <CheckCircleOutlineIcon
+              sx={{ fontSize: 60, color: "#4caf50", animation: "pop 0.3s ease" }}
+            />
+          ) : (
+            <ErrorOutlineIcon
+              sx={{ fontSize: 60, color: "#f44336", animation: "pop 0.3s ease" }}
+            />
+          )}
+          <Typography sx={{ mt: 2 }}>{modalData.message}</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button variant="contained" onClick={() => setModalOpen(false)}>
+            OK
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

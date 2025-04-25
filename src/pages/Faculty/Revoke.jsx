@@ -1,9 +1,21 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import "../../styles/revoke.css"; 
+import "../../styles/revoke.css";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Typography,
+} from "@mui/material";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import CancelIcon from "@mui/icons-material/Cancel";
 
 const Revoke = () => {
   const [complaints, setComplaints] = useState([]);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalContent, setModalContent] = useState({ icon: null, message: "" });
 
   useEffect(() => {
     fetchComplaints();
@@ -21,7 +33,17 @@ const Revoke = () => {
   const updateStatus = async (roll_no, status) => {
     try {
       await axios.put(`http://localhost:5000/api/revoked/${roll_no}`, { status });
-      fetchComplaints(); // Refresh after action
+      setModalContent({
+        icon:
+          status === "Accepted" ? (
+            <CheckCircleIcon className="modal-icon accepted" />
+          ) : (
+            <CancelIcon className="modal-icon declined" />
+          ),
+        message: `Complaint ${status}!`,
+      });
+      setModalOpen(true);
+      fetchComplaints(); // Refresh
     } catch (err) {
       console.error("Error updating status:", err);
     }
@@ -55,6 +77,18 @@ const Revoke = () => {
           </div>
         ))}
       </div>
+
+      {/* Modal */}
+      <Dialog open={modalOpen} onClose={() => setModalOpen(false)}>
+        <DialogTitle>Status Update</DialogTitle>
+        <DialogContent style={{ textAlign: "center" }}>
+          {modalContent.icon}
+          <Typography variant="h6" sx={{ mt: 2 }}>{modalContent.message}</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setModalOpen(false)} variant="contained">OK</Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };
