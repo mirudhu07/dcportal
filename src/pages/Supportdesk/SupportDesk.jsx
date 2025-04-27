@@ -11,7 +11,6 @@ import {
   DialogActions,
   Slide,
 } from "@mui/material";
-import SupportSidebar from "../../components/sidebar/SupportSidebar";
 import "../../styles/Supportdesk.css";
 
 // Slide animation for modal
@@ -63,78 +62,80 @@ const SupportDesk = () => {
 
   return (
     <Box sx={{ p: 4 }}>
-      <Typography variant="h4" sx={{ mb: 3 }}>
+      <Typography variant="h4" sx={{ mb: 3, marginTop: "-120px", marginLeft: "30px" }}>
         Support Desk - Unassigned Complaints
       </Typography>
 
       {logs.length === 0 ? (
         <Typography>No unassigned logs found.</Typography>
       ) : (
-        logs.map((log) => {
-          const status = log.status || "Pending";
-          const statusClass = getStatusClass(status);
+        <div className="complaints-container">
+          {logs.map((log) => {
+            const status = log.status || "Pending";
+            const statusClass = getStatusClass(status);
 
-          return (
-            <Box
-              key={log.complaint_id}
-              className={`complaint-card ${statusClass}`}
-            >
-              <Typography className={`status-label status-${status.toLowerCase()}`}>
-                {status}
-              </Typography>
-              <Typography><b>ID:</b> {log.complaint_id}</Typography>
-              <Typography><b>Time:</b> {log.time_date}</Typography>
-              <Typography><b>Complain:</b> {log.comment}</Typography>
-              <Typography><b>Venue:</b> {log.venue}</Typography>
+            return (
+              <Box
+                key={log.complaint_id}
+                className={`complaint-card ${statusClass}`}
+              >
+                <Typography className={`status-label status-${status.toLowerCase()}`}>
+                  {status}
+                </Typography>
+                <Typography><b>ID:</b> {log.complaint_id}</Typography>
+                <Typography><b>Time:</b> {log.time_date}</Typography>
+                <Typography><b>Complain:</b> {log.comment}</Typography>
+                <Typography><b>Venue:</b> {log.venue}</Typography>
 
-              {editingId === log.complaint_id && (
-                <Box sx={{ mt: 2 }}>
-                  <Typography variant="subtitle1" sx={{ mb: 1 }}>
-                    Upload Response Video:
-                  </Typography>
+                {editingId === log.complaint_id && (
+                  <Box sx={{ mt: 2 }}>
+                    <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                      Upload Response Video:
+                    </Typography>
 
-                  <Input
-                    type="file"
-                    accept="video/*"
-                    onChange={(e) =>
-                      setSelectedVideo((prev) => ({
-                        ...prev,
-                        [log.complaint_id]: e.target.files[0],
-                      }))
-                    }
-                  />
+                    <Input
+                      type="file"
+                      accept="video/*"
+                      onChange={(e) =>
+                        setSelectedVideo((prev) => ({
+                          ...prev,
+                          [log.complaint_id]: e.target.files[0],
+                        }))
+                      }
+                    />
 
-                  {selectedVideo[log.complaint_id] && (
-                    <Box sx={{ mt: 2 }}>
-                      <Typography variant="body2">Preview:</Typography>
-                      <video
-                        controls
-                        width="100%"
-                        style={{ maxHeight: 300 }}
-                        src={URL.createObjectURL(selectedVideo[log.complaint_id])}
-                      />
-                    </Box>
-                  )}
+                    {selectedVideo[log.complaint_id] && (
+                      <Box sx={{ mt: 2 }}>
+                        <Typography variant="body2">Preview:</Typography>
+                        <video
+                          controls
+                          width="100%"
+                          style={{ maxHeight: 300 }}
+                          src={URL.createObjectURL(selectedVideo[log.complaint_id])}
+                        />
+                      </Box>
+                    )}
+                  </Box>
+                )}
+
+                <Box className="complaint-buttons">
+                  <button
+                    className="accept-button"
+                    onClick={() => handleEdit(log.complaint_id)}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    className="decline-button"
+                    onClick={() => handleSend(log.complaint_id)}
+                  >
+                    Send
+                  </button>
                 </Box>
-              )}
-
-              <Box className="complaint-buttons">
-                <button
-                  className="accept-button"
-                  onClick={() => handleEdit(log.complaint_id)}
-                >
-                  Edit
-                </button>
-                <button
-                  className="decline-button"
-                  onClick={() => handleSend(log.complaint_id)}
-                >
-                  Send
-                </button>
               </Box>
-            </Box>
-          );
-        })
+            );
+          })}
+        </div>
       )}
 
       {/* Modal for alerts with animation */}

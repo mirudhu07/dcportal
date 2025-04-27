@@ -1,35 +1,62 @@
-import React from "react";
-import { List, ListItem, ListItemIcon, ListItemText, Box } from "@mui/material";
-import VideoLibraryIcon from "@mui/icons-material/VideoLibrary";
-import LogoutIcon from "@mui/icons-material/Logout";
+import React, { useState } from "react";
 
 const SupportSidebar = ({ onSelect }) => {
+  const [collapsed] = useState(true); // static for now, just like you did
+
   return (
-    <Box
-      sx={{
-        width: "200px",
+    <div
+      className="d-flex flex-column text-white vh-100 p-3"
+      style={{
+        backgroundColor: "black",
+        width: collapsed ? "100px" : "250px",
         height: "100vh",
-        backgroundColor: "#f5f5f5",
-        borderRight: "1px solid #ddd",
-        paddingTop: "20px",
+        position: "fixed",
+        top: 0,
+        left: 0,
+        transition: "width 0.3s ease",
       }}
     >
-      <List>
-        <ListItem button onClick={() => onSelect("supportDesk")}>
-          <ListItemIcon>
-            <VideoLibraryIcon />
-          </ListItemIcon>
-          {/* <ListItemText primary="Upload Video" /> */}
-        </ListItem>
+      {/* Toggle button (optional, non-functional now) */}
+      <button
+        className="btn btn-outline-light mb-3"
+        style={{ marginTop: "8px" }}
+      >
+        <i className="bi bi-list-ul fs-4"></i>
+      </button>
 
-        <ListItem button onClick={() => window.location.reload()}>
-          <ListItemIcon>
-            <LogoutIcon />
-          </ListItemIcon>
-          {/* <ListItemText primary="Logout" /> */}
-        </ListItem>
-      </List>
-    </Box>
+      {/* Menu Items */}
+      <div style={{ marginTop: "40px" }}>
+        <ul className="nav flex-column fs-5 mt-5">
+          <div className="my-3 mx-1" style={{ fontFamily: "Tahoma" }}>
+            <SidebarItem
+              icon="bi bi-collection-play"
+              label="Support Desk"
+              collapsed={collapsed}
+              onClick={() => onSelect("supportDesk")}
+            />
+          </div>
+          <div className="my-3 mx-1" style={{ fontFamily: "Tahoma" }}>
+            <SidebarItem
+              icon="bi bi-box-arrow-left"
+              label="Logout"
+              collapsed={collapsed}
+              onClick={() => window.location.reload()}
+            />
+          </div>
+        </ul>
+      </div>
+    </div>
+  );
+};
+
+const SidebarItem = ({ icon, label, collapsed, onClick }) => {
+  return (
+    <li className="nav-item" onClick={onClick} style={{ cursor: "pointer" }}>
+      <div className="nav-link d-flex align-items-center text-light">
+        <i className={`${icon} fs-5`}></i>
+        {!collapsed && <span className="ms-3">{label}</span>}
+      </div>
+    </li>
   );
 };
 

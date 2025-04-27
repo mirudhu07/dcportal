@@ -8,6 +8,8 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  Paper,
+  Fade,
 } from "@mui/material";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
@@ -89,117 +91,134 @@ const Logger = () => {
     <Box
       sx={{
         p: 3,
-        maxWidth: 600,
-        mx: "auto",
+        width: "100%",
+        minHeight: "calc(100vh - 64px)",
         display: "flex",
-        justifyContent: "center",
+        flexDirection: "column",
         alignItems: "center",
-        marginLeft: "250px",
+        justifyContent: "center", 
+        background: "#f9f9f9",
+        position: "relative",
       }}
     >
-      {!showForm && (
-        <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => setShowForm(true)}
-            sx={{ position: "absolute", top: 20, right: 20 }}
-          >
-            + CREATE
-          </Button>
-        </Box>
-      )}
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={() => setShowForm(true)}
+        sx={{
+          position: "fixed",
+          top: 100,
+          right: 40,
+          zIndex: 1000,
+        }}
+      >
+        + CREATE
+      </Button>
 
       {showForm && (
         <Box
           sx={{
-            p: 3,
-            border: "1px solid #ccc",
-            borderRadius: "5px",
-            backgroundColor: "white",
-            boxShadow: 3,
+            width: "150%",
+            display: "flex",
+            justifyContent: "center", 
+            alignItems: "center",
+            marginLeft: "180px",
+            mt: 8,
           }}
         >
-          <Typography variant="h5" sx={{ mb: 2 }}>
-            Create Log Entry
-          </Typography>
+          <Paper
+            elevation={6}
+            sx={{
+              p: 4,
+              width: "100%",
+              maxWidth: 600,
+              borderRadius: 4,
+              marginTop: "-90px",
+              backgroundColor: "#fff",
+            }}
+          >
+            <Typography variant="h5" sx={{ mb: 3, textAlign: "center" }}>
+              Create Log Entry
+            </Typography>
 
-          <TextField
-            label="Search Student"
-            fullWidth
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            sx={{ mb: 2 }}
-            autoComplete="off"
-          />
-          {filteredStudents.length > 0 && (
-            <Box
-              sx={{
-                border: "1px solid #ccc",
-                borderRadius: "5px",
-                maxHeight: 150,
-                overflowY: "auto",
-                background: "white",
-              }}
-            >
-              {filteredStudents.map((student) => (
-                <Box
-                  key={student.S_ID}
-                  sx={{
-                    padding: "10px",
-                    cursor: "pointer",
-                    "&:hover": { backgroundColor: "#f0f0f0" },
-                  }}
-                  onClick={() => handleSelectStudent(student)}
-                >
-                  {student.S_ID} - {student.name}
-                </Box>
-              ))}
+            <TextField
+              label="Search Student"
+              fullWidth
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              sx={{ mb: 2 }}
+              autoComplete="off"
+            />
+
+            {filteredStudents.length > 0 && (
+              <Paper
+                elevation={3}
+                sx={{
+                  mb: 2,
+                  maxHeight: 150,
+                  overflowY: "auto",
+                  backgroundColor: "#fff",
+                }}
+              >
+                {filteredStudents.map((student) => (
+                  <Fade in key={student.S_ID}>
+                    <Box
+                      sx={{
+                        p: 1,
+                        cursor: "pointer",
+                        "&:hover": { backgroundColor: "#f0f0f0" },
+                      }}
+                      onClick={() => handleSelectStudent(student)}
+                    >
+                      {student.S_ID} - {student.name}
+                    </Box>
+                  </Fade>
+                ))}
+              </Paper>
+            )}
+
+            <TextField label="Register Number" fullWidth value={SID} disabled sx={{ mb: 2 }} />
+            <TextField label="Student Name" fullWidth value={studentName} disabled sx={{ mb: 2 }} />
+            <TextField
+              label="Faculty Name"
+              fullWidth
+              value={facultyName}
+              onChange={(e) => setFacultyName(e.target.value)}
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              type="datetime-local"
+              fullWidth
+              value={timeDate}
+              onChange={(e) => setTimeDate(e.target.value)}
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              label="Comment"
+              multiline
+              rows={3}
+              fullWidth
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              label="Venue"
+              fullWidth
+              value={venue}
+              onChange={(e) => setVenue(e.target.value)}
+              sx={{ mb: 3 }}
+            />
+
+            <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+              <Button variant="contained" color="primary" onClick={handleSubmit}>
+                Submit
+              </Button>
+              <Button variant="outlined" color="secondary" onClick={() => setShowForm(false)}>
+                Cancel
+              </Button>
             </Box>
-          )}
-
-          <TextField label="Register Number" fullWidth value={SID} disabled sx={{ mb: 2 }} />
-          <TextField label="Student Name" fullWidth value={studentName} disabled sx={{ mb: 2 }} />
-
-          <TextField
-            label="Faculty Name"
-            fullWidth
-            value={facultyName}
-            onChange={(e) => setFacultyName(e.target.value)}
-            sx={{ mb: 2 }}
-          />
-          <TextField
-            type="datetime-local"
-            fullWidth
-            value={timeDate}
-            onChange={(e) => setTimeDate(e.target.value)}
-            sx={{ mb: 2 }}
-          />
-          <TextField
-            label="Comment"
-            multiline
-            rows={3}
-            fullWidth
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-            sx={{ mb: 2 }}
-          />
-          <TextField
-            label="Venue"
-            fullWidth
-            value={venue}
-            onChange={(e) => setVenue(e.target.value)}
-            sx={{ mb: 2 }}
-          />
-
-          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-            <Button variant="contained" color="primary" onClick={handleSubmit}>
-              Submit
-            </Button>
-            <Button variant="outlined" color="secondary" onClick={() => setShowForm(false)}>
-              Cancel
-            </Button>
-          </Box>
+          </Paper>
         </Box>
       )}
 

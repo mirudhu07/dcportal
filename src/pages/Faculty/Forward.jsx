@@ -10,6 +10,7 @@ import {
   DialogContent,
   DialogActions,
   Slide,
+  Grid,
 } from "@mui/material";
 
 // Slide transition for modal
@@ -63,29 +64,62 @@ const Forward = () => {
 
   return (
     <Box sx={{ p: 4 }}>
-      <Typography variant="h4" sx={{ mb: 3 }}>
+      <Typography variant="h4" sx={{ mb: 4, fontWeight: "bold" ,marginTop: "-70px", marginLeft:"290px"}}>
         Forward Complaints to Admin
       </Typography>
 
       {logs.length === 0 ? (
         <Typography>No complaints found.</Typography>
       ) : (
-        logs.map((log) => (
-          <Paper key={log.id} sx={{ mb: 3, p: 2 }}>
-            <Typography><b>ID:</b> {log.id}</Typography>
-            <Typography><b>Student:</b> {log.student_name}</Typography>
-            <Typography><b>Date & Time:</b> {log.time_date}</Typography>
-            <Typography><b>Venue:</b> {log.venue}</Typography>
-            <Typography><b>Comment:</b> {log.comment}</Typography>
-            <Button
-              variant="contained"
-              sx={{ mt: 2 }}
-              onClick={() => handleSend(log)}
-            >
-              Send to Admin
-            </Button>
-          </Paper>
-        ))
+        <Grid container spacing={3}>
+          {logs.map((log) => (
+            <Grid item xs={12} sm={6} md={4} key={log.id}>
+              <Paper
+                elevation={4}
+                sx={{
+                  p: 3,
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                  borderRadius: 3,
+                  transition: "transform 0.3s",
+                  "&:hover": {
+                    transform: "translateY(-5px)",
+                    boxShadow: "0 6px 20px rgba(0,0,0,0.1)",
+                  },
+                }}
+              >
+                <Box>
+                  <Typography variant="subtitle2" color="textSecondary">
+                    ID: {log.id}
+                  </Typography>
+                  <Typography variant="h6" sx={{ mt: 1 }}>
+                    {log.student_name}
+                  </Typography>
+                  <Typography variant="body2" sx={{ mt: 1 }}>
+                    <strong>Date & Time:</strong> {log.time_date}
+                  </Typography>
+                  <Typography variant="body2" sx={{ mt: 1 }}>
+                    <strong>Venue:</strong> {log.venue}
+                  </Typography>
+                  <Typography variant="body2" sx={{ mt: 1 }}>
+                    <strong>Comment:</strong> {log.comment}
+                  </Typography>
+                </Box>
+
+                <Button
+                  variant="contained"
+                  color="primary"
+                  sx={{ mt: 3 }}
+                  onClick={() => handleSend(log)}
+                >
+                  Send to Admin
+                </Button>
+              </Paper>
+            </Grid>
+          ))}
+        </Grid>
       )}
 
       {/* Animated Modal */}

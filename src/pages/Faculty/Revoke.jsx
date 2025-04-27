@@ -16,6 +16,7 @@ const Revoke = () => {
   const [complaints, setComplaints] = useState([]);
   const [filteredComplaints, setFilteredComplaints] = useState([]);
   const [filter, setFilter] = useState("All");
+  const [expandedCard, setExpandedCard] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState({ icon: null, message: "" });
 
@@ -65,38 +66,52 @@ const Revoke = () => {
     }
   };
 
+  const handleCardClick = (roll_no) => {
+    setExpandedCard((prev) => (prev === roll_no ? null : roll_no));
+  };
+
   return (
     <div className="revoke-container">
       <h2>Revoked Complaints</h2>
 
       {/* Filter Buttons */}
       <div className="filter-buttons">
-        <button className={filter === "All" ? "active" : ""} onClick={() => setFilter("All")}>All</button>
-        <button className={filter === "Accepted" ? "active" : ""} onClick={() => setFilter("Accepted")}>Accepted</button>
-        <button className={filter === "Declined" ? "active" : ""} onClick={() => setFilter("Declined")}>Declined</button>
-        <button className={filter === "Pending" ? "active" : ""} onClick={() => setFilter("Pending")}>Pending</button>
+        {["All", "Accepted", "Declined", "Pending"].map((type) => (
+          <button
+            key={type}
+            className={filter === type ? "filter-btn active" : "filter-btn"}
+            onClick={() => setFilter(type)}
+          >
+            {type}
+          </button>
+        ))}
       </div>
 
       <div className="revoke-grid">
         {filteredComplaints.map((complaint) => (
           <div
             key={complaint.Roll_no}
-            className={`revoke-card ${complaint.STATUS_?.toLowerCase() || "pending"}`}
+            className={`revoke-card ${complaint.STATUS_?.toLowerCase() || "pending"} ${
+              expandedCard === complaint.Roll_no ? "expanded" : ""
+            }`}
+            onClick={() => handleCardClick(complaint.Roll_no)}
           >
             <div className="revoke-card-header">
               <p><strong>Name:</strong> {complaint.S_name}</p>
               <p><strong>Register Number:</strong> {complaint.Roll_no}</p>
-              <p><strong>Reason:</strong> {complaint.REASON}</p>
+              {expandedCard === complaint.Roll_no && (
+                <p><strong>Reason:</strong> {complaint.REASON}</p>
+              )}
             </div>
 
             {complaint.STATUS_ ? (
               <p className={`status-text ${complaint.STATUS_ === "Accepted" ? "accepted" : "declined"}`}>
-                Status: {complaint.STATUS_}
+                 {complaint.STATUS_}
               </p>
-            ) : (
+            ) : expandedCard === complaint.Roll_no && (
               <div className="button-group">
-                <button className="accept-btn" onClick={() => updateStatus(complaint.Roll_no, "Accepted")}>ACCEPT</button>
-                <button className="decline-btn" onClick={() => updateStatus(complaint.Roll_no, "Declined")}>DECLINE</button>
+                <button className="accept-btn action-btn" onClick={(e) => {e.stopPropagation(); updateStatus(complaint.Roll_no, "Accepted")}}>ACCEPT</button>
+                <button className="decline-btn action-btn" onClick={(e) => {e.stopPropagation(); updateStatus(complaint.Roll_no, "Declined")}}>DECLINE</button>
               </div>
             )}
           </div>

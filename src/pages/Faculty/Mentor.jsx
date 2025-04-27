@@ -56,24 +56,24 @@ const Mentor = () => {
   return (
     <div className="mentor-page">
       <h2>Mentor</h2>
-      {queue.map((item, idx) => (
-        <div key={idx} className="card">
-          <video width="200" controls src={`http://localhost:5000/${item.video_path}`} />
-          <div className="info">
-            <p>Complaint ID: {item.complaint_id}</p>
-            <button className="yes" onClick={() => handleYes(item)}>Yes</button>
-            <button className="no">No</button>
+
+      <div className="cards-container">
+        {queue.map((item, idx) => (
+          <div key={idx} className="card">
+            <video controls src={`http://localhost:5000/${item.video_path}`} />
+            <div className="info">
+              <p>Complaint ID: {item.complaint_id}</p>
+              <button className="yes" onClick={() => handleYes(item)}>Yes</button>
+              <button className="no">No</button>
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
 
       {showForm && (
         <div className="popup-form">
-          {/* Close Icon */}
-          <IconButton
-            sx={{ position: "absolute", top: 8, right: 8 }}
-            onClick={() => setShowForm(false)}
-          >
+          {/* Close Icon with custom class */}
+          <IconButton className="close-icon" onClick={() => setShowForm(false)}>
             <CloseIcon />
           </IconButton>
 
@@ -90,7 +90,7 @@ const Mentor = () => {
             value={formData.S_ID}
             onChange={(e) => setFormData({ ...formData, S_ID: e.target.value })}
           />
-          <button onClick={handleSubmit}>Submit</button>
+          <button className="submit-button" onClick={handleSubmit}>Submit</button>
         </div>
       )}
 
