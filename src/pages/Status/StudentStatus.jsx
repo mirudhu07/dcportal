@@ -3,7 +3,7 @@ import axios from "axios";
 import { Button, TextField, Box, Typography, MenuItem, Select } from "@mui/material";
 
 const StudentStatus = () => {
-  const [student, setStudent] = useState({ roll_no: "S1001", name: "John Doe" }); // Replace with actual student data
+  const [student, setStudent] = useState({ roll_no: "S1001", name: "John Doe" }); 
   const [complaints, setComplaints] = useState([]);
   const [selectedComplaintId, setSelectedComplaintId] = useState("");
   const [revokeReason, setRevokeReason] = useState("");

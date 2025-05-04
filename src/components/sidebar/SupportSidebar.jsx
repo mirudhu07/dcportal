@@ -7,7 +7,7 @@ const SupportSidebar = ({ onSelect }) => {
     <div
       className="d-flex flex-column text-white vh-100 p-3"
       style={{
-        backgroundColor: "black",
+        backgroundColor: "white",
         width: collapsed ? "100px" : "250px",
         height: "100vh",
         position: "fixed",

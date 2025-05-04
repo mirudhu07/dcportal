@@ -1,86 +1,63 @@
-/*  import React from "react";
-import {
-  Drawer,
-  List,
-  ListItem,
-  ListItemIcon,
-  Tooltip, // Tooltip added
-} from "@mui/material";
-import AssignmentIcon from "@mui/icons-material/Assignment";
-import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
-import BlockIcon from "@mui/icons-material/Block";
-import ExitToAppIcon from "@mui/icons-material/ExitToApp";
-import ForwardToInboxIcon from "@mui/icons-material/ForwardToInbox";
-
-import "../../styles/sidebar.css";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom"; // ✅ import navigate
 
 const Sidebar = ({ onSelect }) => {
-  const menuItems = [
-    { text: "Logger", icon: <AssignmentIcon />, page: "logger" },
-    { text: "Mentor", icon: <SupervisorAccountIcon />, page: "mentor" },
-    { text: "Revoke", icon: <BlockIcon />, page: "revoke" },
-    { text: "Forward", icon: <ForwardToInboxIcon />, page: "forward" },
-    { text: "Logout", icon: <ExitToAppIcon />, page: "logout" },
-  ];
+  const [collapsed, setCollapsed] = useState(false); 
+  const [activeItem, setActiveItem] = useState(""); 
+  const navigate = useNavigate(); // ✅ initialize
 
-  return (
-    <Drawer variant="permanent">
-      <List>
-        {menuItems.map((item) => (
-          <Tooltip key={item.text} title={item.text} placement="right">
-            <ListItem button onClick={() => onSelect(item.page)}>
-              <ListItemIcon>{item.icon}</ListItemIcon>
-            </ListItem>
-          </Tooltip>
-        ))}
-      </List>
-    </Drawer>
-  );
-};
+  const toggleSidebar = () => {
+    setCollapsed(!collapsed);
+  };
 
-export default Sidebar; */
- 
- import { useState } from "react";
+  const handleSelect = (item) => {
+    setActiveItem(item); 
+    onSelect(item);      
 
-const Sidebar = ({ onSelect }) => {
-  const [collapsed] = useState(true);
+    if (item === "logout") {
+      navigate("/");  // ✅ navigate to login page on logout
+    }
+  };
 
   return (
     <div
-      className="d-flex flex-column text-white vh-100 p-3"
+      className="d-flex flex-column vh-100 p-0"
       style={{
-        backgroundColor: "black",
-        width: collapsed ? "100px" : "290px",
+        backgroundColor: "white",
+        width: collapsed ? "100px" : "250px",
         height: "100vh",
         position: "fixed",
         top: 0,
         left: 0,
         transition: "width 0.3s ease",
+        overflow: "hidden",
+        borderRight: "1px solid lightgrey" // optional better look
       }}
     >
       <button
-        className="btn btn-outline-light mb-3"
+        className="btn btn-outline-dark mb-3"
+        onClick={toggleSidebar}
         style={{ marginTop: "8px" }}
       >
-        <i className="bi bi-list-ul fs-4"></i>
+        <i className="bi bi-list"></i>
       </button>
 
       <div style={{ marginTop: "40px" }}>
         <ul className="nav flex-column fs-5 mt-5">
           <div className="my-3 mx-1" style={{ fontFamily: "Tahoma" }}>
-            <SidebarItem icon="bi bi-journal-text" label="Logger" collapsed={collapsed} onClick={() => onSelect("logger")} />
+            <SidebarItem icon="bi bi-journal-text" label="Logger" collapsed={collapsed} active={activeItem === "logger"} onClick={() => handleSelect("logger")} />
           </div>
           <div className="my-3 mx-1" style={{ fontFamily: "Tahoma" }}>
-            <SidebarItem icon="bi-people" label="Mentor" collapsed={collapsed} onClick={() => onSelect("mentor")} />
+            <SidebarItem icon="bi bi-people" label="Mentor" collapsed={collapsed} active={activeItem === "mentor"} onClick={() => handleSelect("mentor")} />
           </div>
           <div className="my-3 mx-1" style={{ fontFamily: "Tahoma" }}>
-            <SidebarItem icon="bi-slash-circle" label="Revoke" collapsed={collapsed} onClick={() => onSelect("revoke")} />
+            <SidebarItem icon="bi bi-slash-circle" label="Revoke" collapsed={collapsed} active={activeItem === "revoke"} onClick={() => handleSelect("revoke")} />
           </div>
           <div className="my-3 mx-1" style={{ fontFamily: "Tahoma" }}>
-            <SidebarItem icon="bi bi-send-fill" label="Forward" collapsed={collapsed} onClick={() => onSelect("forward")} />
+            <SidebarItem icon="bi bi-send-fill" label="Forward" collapsed={collapsed} active={activeItem === "forward"} onClick={() => handleSelect("forward")} />
           </div>
           <div className="my-3 mx-1" style={{ fontFamily: "Tahoma" }}>
-            <SidebarItem icon="bi-box-arrow-left" label="Logout" collapsed={collapsed} onClick={() => onSelect("")} />
+            <SidebarItem icon="bi bi-box-arrow-left" label="Logout" collapsed={collapsed} active={activeItem === "logout"} onClick={() => handleSelect("logout")} />
           </div>
         </ul>
       </div>
@@ -88,16 +65,21 @@ const Sidebar = ({ onSelect }) => {
   );
 };
 
-const SidebarItem = ({ icon, label, collapsed, onClick }) => {
+const SidebarItem = ({ icon, label, collapsed, active, onClick }) => {
   return (
     <li className="nav-item" onClick={onClick} style={{ cursor: "pointer" }}>
-      <div className="nav-link d-flex align-items-center text-light">
-        <i className={`bi ${icon} fs-5`}></i>
+      <div
+        className="nav-link d-flex align-items-center"
+        style={{
+          color: active ? "#0d6efd" : "grey", 
+          fontWeight: active ? "bold" : "normal",
+        }}
+      >
+        <i className={`${icon} fs-5`}></i>
         {!collapsed && <span className="ms-3">{label}</span>}
       </div>
     </li>
   );
 };
 
-export default Sidebar; 
-
+export default Sidebar;
