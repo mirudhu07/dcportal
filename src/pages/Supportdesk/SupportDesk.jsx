@@ -61,8 +61,8 @@ const SupportDesk = () => {
   };
 
   return (
-    <Box sx={{ p: 4 }}>
-       <Typography variant="h4" sx={{ mb: 3, marginTop: "-120px", marginLeft: "30px" }}>
+    <Box sx={{ p: 4, }}>
+       <Typography variant="h4" sx={{ mb: 3, marginTop: "-120px", marginLeft: "190px" }}>
         Support Desk - Unassigned Complaints
       </Typography>
 

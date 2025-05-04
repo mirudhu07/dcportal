@@ -118,11 +118,12 @@ const Logger = () => {
       {showForm && (
         <Box
           sx={{
-            width: "150%",
+            width: "100%",
             display: "flex",
+            minHeight: "calc(100vh - 64px)",
             justifyContent: "center", 
             alignItems: "center",
-            marginLeft: "180px",
+            marginLeft: "200px",
             mt: 8,
           }}
         >
@@ -133,7 +134,7 @@ const Logger = () => {
               width: "100%",
               maxWidth: 600,
               borderRadius: 4,
-              marginTop: "-90px",
+              /* marginTop: "-70px",  */
               backgroundColor: "#fff",
             }}
           >

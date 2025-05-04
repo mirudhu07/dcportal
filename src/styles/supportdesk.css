@@ -4,6 +4,7 @@
   grid-template-columns: repeat(3, 1fr); /* 3 cards per row */
   gap: 24px;
   padding: 20px;
+  margin-left: 40px;
 }
 
 /* Complaint Card */

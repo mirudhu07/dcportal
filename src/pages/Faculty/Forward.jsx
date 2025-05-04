@@ -63,15 +63,15 @@ const Forward = () => {
   };
 
   return (
-    <Box sx={{ p: 4 }}>
-      <Typography variant="h4" sx={{ mb: 4, fontWeight: "bold" ,marginTop: "-70px", marginLeft:"290px"}}>
+    <Box sx={{ p: 4, ml: { xs: '70px', sm: '70px' } }}>
+      <Typography variant="h4" sx={{ mb: 4, fontWeight: "bold" ,marginTop: "0px", marginLeft:"300px"}}>
         Forward Complaints to Admin
       </Typography>
 
       {logs.length === 0 ? (
         <Typography>No complaints found.</Typography>
       ) : (
-        <Grid container spacing={3}>
+        <Grid container spacing={3} >
           {logs.map((log) => (
             <Grid item xs={12} sm={6} md={4} key={log.id}>
               <Paper

@@ -1,65 +1,85 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom"; // ✅ import navigate
+import { useNavigate } from "react-router-dom";
 
 const Sidebar = ({ onSelect }) => {
-  const [collapsed, setCollapsed] = useState(false); 
-  const [activeItem, setActiveItem] = useState(""); 
-  const navigate = useNavigate(); // ✅ initialize
+  const [collapsed, setCollapsed] = useState(false);
+  const [activeItem, setActiveItem] = useState("");
+  const [hamburgerClicked, setHamburgerClicked] = useState(false);
+  const navigate = useNavigate();
 
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
+    setHamburgerClicked(!hamburgerClicked);
   };
 
   const handleSelect = (item) => {
-    setActiveItem(item); 
-    onSelect(item);      
+    setActiveItem(item);
+    onSelect(item);
 
     if (item === "logout") {
-      navigate("/");  // ✅ navigate to login page on logout
+      navigate("/");
     }
   };
 
+  const menuItems = [
+    { icon: "bi bi-journal-text", label: "Logger", key: "logger" },
+    { icon: "bi bi-people", label: "Mentor", key: "mentor" },
+    { icon: "bi bi-slash-circle", label: "Revoke", key: "revoke" },
+    { icon: "bi bi-send-fill", label: "Forward", key: "forward" },
+  ];
+
   return (
     <div
-      className="d-flex flex-column vh-100 p-0"
+      className="d-flex flex-column justify-content-between vh-100 shadow"
       style={{
-        backgroundColor: "white",
-        width: collapsed ? "100px" : "250px",
-        height: "100vh",
+        backgroundColor: "#ffffff", // Change background color to white
+        width: collapsed ? "65px" : "250px",
         position: "fixed",
         top: 0,
         left: 0,
         transition: "width 0.3s ease",
         overflow: "hidden",
-        borderRight: "1px solid lightgrey" // optional better look
+        zIndex: 1000,
       }}
     >
-      <button
-        className="btn btn-outline-dark mb-3"
-        onClick={toggleSidebar}
-        style={{ marginTop: "8px" }}
-      >
-        <i className="bi bi-list"></i>
-      </button>
+      {/* Top Section: Hamburger and Menu */}
+      <div>
+        <button
+          className="btn mb-3"
+          onClick={toggleSidebar}
+          style={{
+            color: hamburgerClicked ? "#0d6efd" : "#000000", // Change color to black when not clicked
+            marginTop: "10px",
+            marginLeft: collapsed ? "8px" : "16px",
+          }}
+        >
+          <i className="bi bi-list fs-4"></i>
+        </button>
 
-      <div style={{ marginTop: "40px" }}>
-        <ul className="nav flex-column fs-5 mt-5">
-          <div className="my-3 mx-1" style={{ fontFamily: "Tahoma" }}>
-            <SidebarItem icon="bi bi-journal-text" label="Logger" collapsed={collapsed} active={activeItem === "logger"} onClick={() => handleSelect("logger")} />
-          </div>
-          <div className="my-3 mx-1" style={{ fontFamily: "Tahoma" }}>
-            <SidebarItem icon="bi bi-people" label="Mentor" collapsed={collapsed} active={activeItem === "mentor"} onClick={() => handleSelect("mentor")} />
-          </div>
-          <div className="my-3 mx-1" style={{ fontFamily: "Tahoma" }}>
-            <SidebarItem icon="bi bi-slash-circle" label="Revoke" collapsed={collapsed} active={activeItem === "revoke"} onClick={() => handleSelect("revoke")} />
-          </div>
-          <div className="my-3 mx-1" style={{ fontFamily: "Tahoma" }}>
-            <SidebarItem icon="bi bi-send-fill" label="Forward" collapsed={collapsed} active={activeItem === "forward"} onClick={() => handleSelect("forward")} />
-          </div>
-          <div className="my-3 mx-1" style={{ fontFamily: "Tahoma" }}>
-            <SidebarItem icon="bi bi-box-arrow-left" label="Logout" collapsed={collapsed} active={activeItem === "logout"} onClick={() => handleSelect("logout")} />
-          </div>
+        <ul className="nav flex-column align-items-start mt-4 px-2">
+          {menuItems.map(({ icon, label, key }) => (
+            <li key={key} className="nav-item w-100 text-center">
+              <SidebarItem
+                icon={icon}
+                label={label}
+                collapsed={collapsed}
+                active={activeItem === key}
+                onClick={() => handleSelect(key)}
+              />
+            </li>
+          ))}
         </ul>
+      </div>
+
+      {/* Bottom Section: Logout */}
+      <div className="mb-4 px-2">
+        <SidebarItem
+          icon="bi bi-box-arrow-left"
+          label="Logout"
+          collapsed={collapsed}
+          active={activeItem === "logout"}
+          onClick={() => handleSelect("logout")}
+        />
       </div>
     </div>
   );
@@ -67,18 +87,19 @@ const Sidebar = ({ onSelect }) => {
 
 const SidebarItem = ({ icon, label, collapsed, active, onClick }) => {
   return (
-    <li className="nav-item" onClick={onClick} style={{ cursor: "pointer" }}>
-      <div
-        className="nav-link d-flex align-items-center"
-        style={{
-          color: active ? "#0d6efd" : "grey", 
-          fontWeight: active ? "bold" : "normal",
-        }}
-      >
-        <i className={`${icon} fs-5`}></i>
-        {!collapsed && <span className="ms-3">{label}</span>}
-      </div>
-    </li>
+    <div
+      className="nav-link d-flex align-items-center"
+      onClick={onClick}
+      style={{
+        color: active ? "#0d6efd" : "#343a40", // Dark gray for better contrast on white background
+        fontWeight: active ? "bold" : "normal",
+        cursor: "pointer",
+        padding: "12px 10px",
+      }}
+    >
+      <i className={`${icon} fs-5`}></i>
+      {!collapsed && <span className="ms-3">{label}</span>}
+    </div>
   );
 };
 

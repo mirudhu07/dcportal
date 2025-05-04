@@ -1,61 +1,109 @@
 import React, { useState } from "react";
 
-const SupportSidebar = ({ onSelect }) => {
-  const [collapsed] = useState(true); // static for now, just like you did
+const SupportSidebar = ({ onSelect, setCollapsed }) => {
+  const [collapsedState, setCollapsedState] = useState(false);
+  const [activeItem, setActiveItem] = useState("supportDesk");
+
+  const toggleSidebar = () => {
+    const newState = !collapsedState;
+    setCollapsedState(newState);
+    setCollapsed(newState); // Notify parent to shift content
+  };
+
+  const sidebarBg = "#ffffff";
 
   return (
     <div
-      className="d-flex flex-column text-white vh-100 p-3"
+      className="d-flex flex-column vh-100 p-3"
       style={{
-        backgroundColor: "white",
-        width: collapsed ? "100px" : "250px",
-        height: "100vh",
+        backgroundColor: sidebarBg,
+        width: collapsedState ? "80px" : "250px",
         position: "fixed",
         top: 0,
         left: 0,
+        height: "100vh",
+        boxShadow: "2px 0 5px rgba(0,0,0,0.1)",
         transition: "width 0.3s ease",
+        zIndex: 1000,
       }}
     >
-      {/* Toggle button (optional, non-functional now) */}
+      {/* Toggle Button */}
       <button
-        className="btn btn-outline-light mb-3"
-        style={{ marginTop: "8px" }}
+        className="btn mb-4"
+        onClick={toggleSidebar}
+        style={{
+          border: "none",
+          background: "none",
+          outline: "none",
+          display: "flex",
+          justifyContent: collapsedState ? "center" : "flex-start",
+          paddingLeft: collapsedState ? "0" : "8px",
+        }}
       >
-        <i className="bi bi-list-ul fs-4"></i>
+        <i
+          className="bi bi-list fs-4"
+          style={{
+            color: collapsedState ? "#007bff" : "#000000",
+            transition: "transform 0.3s ease, color 0.3s ease",
+            transform: collapsedState ? "rotate(180deg)" : "rotate(0deg)",
+          }}
+        ></i>
       </button>
 
       {/* Menu Items */}
-      <div style={{ marginTop: "40px" }}>
-        <ul className="nav flex-column fs-5 mt-5">
-          <div className="my-3 mx-1" style={{ fontFamily: "Tahoma" }}>
-            <SidebarItem
-              icon="bi bi-collection-play"
-              label="Support Desk"
-              collapsed={collapsed}
-              onClick={() => onSelect("supportDesk")}
-            />
-          </div>
-          <div className="my-3 mx-1" style={{ fontFamily: "Tahoma" }}>
-            <SidebarItem
-              icon="bi bi-box-arrow-left"
-              label="Logout"
-              collapsed={collapsed}
-              onClick={() => window.location.reload()}
-            />
-          </div>
-        </ul>
-      </div>
+      <ul className="nav flex-column">
+        <SidebarItem
+          icon="bi bi-collection-play"
+          label="Support Desk"
+          collapsed={collapsedState}
+          isActive={activeItem === "supportDesk"}
+          onClick={() => {
+            setActiveItem("supportDesk");
+            onSelect("supportDesk");
+          }}
+        />
+        <SidebarItem
+          icon="bi bi-box-arrow-left"
+          label="Logout"
+          collapsed={collapsedState}
+          isActive={activeItem === "logout"}
+          onClick={() => {
+            setActiveItem("logout");
+            window.location.href = "/";
+          }}
+        />
+      </ul>
     </div>
   );
 };
 
-const SidebarItem = ({ icon, label, collapsed, onClick }) => {
+const SidebarItem = ({ icon, label, collapsed, onClick, isActive }) => {
   return (
-    <li className="nav-item" onClick={onClick} style={{ cursor: "pointer" }}>
-      <div className="nav-link d-flex align-items-center text-light">
-        <i className={`${icon} fs-5`}></i>
-        {!collapsed && <span className="ms-3">{label}</span>}
-      </div>
+    <li
+      className="nav-item mb-3"
+      onClick={onClick}
+      style={{
+        cursor: "pointer",
+        borderRadius: "8px",
+        padding: "10px",
+        display: "flex",
+        alignItems: "center",
+        backgroundColor: isActive ? "#e9f3ff" : "transparent",
+        transition: "background 0.3s ease",
+      }}
+    >
+      <i
+        className={`${icon} fs-5`}
+        style={{ color: isActive ? "#007bff" : "#000000" }}
+      ></i>
+      {!collapsed && (
+        <span
+          className="ms-3"
+          style={{ color: "#000000", fontWeight: isActive ? "600" : "normal" }}
+        >
+          {label}
+        </span>
+      )}
     </li>
   );
 };
