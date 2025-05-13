@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import "../../styles/mentor.css";
+import "../../../styles/mentor.css";
 import {
   Dialog,
   DialogTitle,
@@ -14,7 +14,7 @@ import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import CloseIcon from "@mui/icons-material/Close";
 
-const Mentor = () => {
+const Mentor3 = () => {
   const [queue, setQueue] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [selectedComplaint, setSelectedComplaint] = useState(null);
@@ -113,4 +113,4 @@ const Mentor = () => {
   );
 };
 
-export default Mentor;
+export default Mentor3;

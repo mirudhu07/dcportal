@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import "../../styles/revoke.css";
+import "../../../styles/revoke.css";
 import {
   Dialog,
   DialogTitle,
@@ -12,7 +12,7 @@ import {
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 
-const Revoke = () => {
+const Revoke3 = () => {
   const [complaints, setComplaints] = useState([]);
   const [filteredComplaints, setFilteredComplaints] = useState([]);
   const [filter, setFilter] = useState("All");
@@ -47,9 +47,9 @@ const Revoke = () => {
     }
   };
 
-  const updateStatus = async (roll_no, status) => {
+  const updateStatus = async (complaintId, status) => {
     try {
-      await axios.put(`http://localhost:5000/api/revoked/${roll_no}`, { status });
+      await axios.put(`http://localhost:5000/api/revoked/${complaintId}`, { status });
       setModalContent({
         icon:
           status === "Accepted" ? (
@@ -66,8 +66,8 @@ const Revoke = () => {
     }
   };
 
-  const handleCardClick = (roll_no) => {
-    setExpandedCard((prev) => (prev === roll_no ? null : roll_no));
+  const handleCardClick = (complaintId) => {
+    setExpandedCard((prev) => (prev === complaintId ? null : complaintId));
   };
 
   return (
@@ -90,28 +90,44 @@ const Revoke = () => {
       <div className="revoke-grid">
         {filteredComplaints.map((complaint) => (
           <div
-            key={complaint.Roll_no}
+            key={complaint.complaint_id}
             className={`revoke-card ${complaint.STATUS_?.toLowerCase() || "pending"} ${
-              expandedCard === complaint.Roll_no ? "expanded" : ""
+              expandedCard === complaint.complaint_id ? "expanded" : ""
             }`}
-            onClick={() => handleCardClick(complaint.Roll_no)}
+            onClick={() => handleCardClick(complaint.complaint_id)}
           >
             <div className="revoke-card-header">
               <p><strong>Name:</strong> {complaint.S_name}</p>
               <p><strong>Register Number:</strong> {complaint.Roll_no}</p>
-              {expandedCard === complaint.Roll_no && (
+              {expandedCard === complaint.complaint_id && (
                 <p><strong>Reason:</strong> {complaint.REASON}</p>
               )}
             </div>
 
             {complaint.STATUS_ ? (
               <p className={`status-text ${complaint.STATUS_ === "Accepted" ? "accepted" : "declined"}`}>
-                 {complaint.STATUS_}
+                {complaint.STATUS_}
               </p>
-            ) : expandedCard === complaint.Roll_no && (
+            ) : expandedCard === complaint.complaint_id && (
               <div className="button-group">
-                <button className="accept-btn action-btn" onClick={(e) => {e.stopPropagation(); updateStatus(complaint.Roll_no, "Accepted")}}>ACCEPT</button>
-                <button className="decline-btn action-btn" onClick={(e) => {e.stopPropagation(); updateStatus(complaint.Roll_no, "Declined")}}>DECLINE</button>
+                <button
+                  className="accept-btn action-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    updateStatus(complaint.complaint_id, "Accepted");
+                  }}
+                >
+                  ACCEPT
+                </button>
+                <button
+                  className="decline-btn action-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    updateStatus(complaint.complaint_id, "Declined");
+                  }}
+                >
+                  DECLINE
+                </button>
               </div>
             )}
           </div>
@@ -133,4 +149,4 @@ const Revoke = () => {
   );
 };
 
-export default Revoke;
+export default Revoke3;

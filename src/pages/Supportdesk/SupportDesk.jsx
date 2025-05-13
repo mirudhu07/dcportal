@@ -10,6 +10,7 @@ import {
   DialogContent,
   DialogActions,
   Slide,
+  TextField,  // Added for description input
 } from "@mui/material";
 import "../../styles/Supportdesk.css";
 
@@ -22,9 +23,9 @@ const SupportDesk = () => {
   const { logs, fetchSupportLogs, sendToMentor } = useSupportStore();
   const [selectedVideo, setSelectedVideo] = useState({});
   const [editingId, setEditingId] = useState(null);
-
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
+  const [description, setDescription] = useState({}); // Store description for each log
 
   useEffect(() => {
     fetchSupportLogs();
@@ -41,12 +42,19 @@ const SupportDesk = () => {
       return;
     }
 
-    await sendToMentor(id, selectedVideo[id]);
+    if (!description[id] || description[id].trim() === "") {
+      setModalMessage("Please provide a description before sending");
+      setModalOpen(true);
+      return;
+    }
+
+    await sendToMentor(id, selectedVideo[id], description[id]);
     setEditingId(null);
     setSelectedVideo((prev) => ({ ...prev, [id]: null }));
+    setDescription((prev) => ({ ...prev, [id]: "" })); // Reset description
     fetchSupportLogs();
 
-    setModalMessage("Video sent to mentor successfully!");
+    setModalMessage("Video and description sent to mentor successfully!");
     setModalOpen(true);
   };
 
@@ -61,8 +69,8 @@ const SupportDesk = () => {
   };
 
   return (
-    <Box sx={{ p: 4, }}>
-       <Typography variant="h4" sx={{ mb: 3, marginTop: "-120px", marginLeft: "190px" }}>
+    <Box sx={{ p: 4 }}>
+      <Typography variant="h4" sx={{ mb: 3, marginTop: "100px", marginLeft: "190px",padding: "-50px", }}>
         Support Desk - Unassigned Complaints
       </Typography>
 
@@ -75,9 +83,9 @@ const SupportDesk = () => {
             const statusClass = getStatusClass(status);
 
             return (
-              <Box
-                key={log.complaint_id}
-                className={`complaint-card ${statusClass}`}
+              <Box key={log.complaint_id} 
+              className={`complaint-card ${statusClass}`}
+              sx={{ mb: 3, padding: "30px", marginLeft: "40px" }}
               >
                 <Typography className={`status-label status-${status.toLowerCase()}`}>
                   {status}
@@ -115,20 +123,30 @@ const SupportDesk = () => {
                         />
                       </Box>
                     )}
+
+                    {/* Added description input */}
+                    <TextField
+                      label="Description"
+                      multiline
+                      rows={4}
+                      fullWidth
+                      value={description[log.complaint_id] || ""}
+                      onChange={(e) =>
+                        setDescription((prev) => ({
+                          ...prev,
+                          [log.complaint_id]: e.target.value,
+                        }))
+                      }
+                      sx={{ mt: 2 }}
+                    />
                   </Box>
                 )}
 
                 <Box className="complaint-buttons">
-                  <button
-                    className="accept-button"
-                    onClick={() => handleEdit(log.complaint_id)}
-                  >
+                  <button className="accept-button" onClick={() => handleEdit(log.complaint_id)}>
                     Edit
                   </button>
-                  <button
-                    className="decline-button"
-                    onClick={() => handleSend(log.complaint_id)}
-                  >
+                  <button className="decline-button" onClick={() => handleSend(log.complaint_id)}>
                     Send
                   </button>
                 </Box>
@@ -139,12 +157,7 @@ const SupportDesk = () => {
       )}
 
       {/* Modal for alerts with animation */}
-      <Dialog
-        open={modalOpen}
-        TransitionComponent={Transition}
-        keepMounted
-        onClose={handleCloseModal}
-      >
+      <Dialog open={modalOpen} TransitionComponent={Transition} keepMounted onClose={handleCloseModal}>
         <DialogTitle>Notification</DialogTitle>
         <DialogContent>
           <Typography>{modalMessage}</Typography>

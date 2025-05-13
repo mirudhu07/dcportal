@@ -12,15 +12,17 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
-    "@mui/icons-material": "^6.4.7",
+    "@mui/icons-material": "^6.4.11",
     "@mui/material": "^6.4.11",
     "axios": "^1.8.3",
     "bootstrap": "^5.3.5",
     "bootstrap-icons": "^1.11.3",
+    "dayjs": "^1.11.13",
     "firebase": "^11.6.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.3.0",
+    "react-webcam": "^7.2.0",
     "zustand": "^5.0.3"
   },
   "devDependencies": {

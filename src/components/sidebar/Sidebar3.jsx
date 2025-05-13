@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const Sidebar = () => {
+const Sidebar3 = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [activeItem, setActiveItem] = useState("");
   const [hamburgerClicked, setHamburgerClicked] = useState(false);
@@ -17,16 +17,16 @@ const Sidebar = () => {
 
     switch (item) {
       case "logger":
-        navigate("/logger");
+        navigate("/logger3");
         break;
       case "mentor":
-        navigate("/mentor");
+        navigate("/mentor3");
         break;
       case "revoke":
-        navigate("/revoke");
+        navigate("/revoke3");
         break;
       case "forward":
-        navigate("/forward");
+        navigate("/forward3");
         break;
       case "logout":
         navigate("/");
@@ -118,4 +118,4 @@ const SidebarItem = ({ icon, label, collapsed, active, onClick }) => {
   );
 };
 
-export default Sidebar;
+export default Sidebar3;

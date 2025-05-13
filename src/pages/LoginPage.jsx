@@ -1,14 +1,24 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Box, TextField, Button, Typography } from "@mui/material";
-import { handleLogin, handleGoogleLogin } from "../components/functionality";
+import { handleLogin, handleGoogleLogin, handleStaticLogin } from "../components/functionality";
 import "../styles/loginpage.css";
 
 const LoginPage = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+
+  const handleSubmit = async () => {
+ 
+  const isStaticLoginSuccessful = handleStaticLogin(username, password, navigate);
+
+  
+  if (!isStaticLoginSuccessful) {
+    await handleLogin(username, password, navigate);
+  }
+};
+
 
   return (
     <div>
@@ -39,7 +49,7 @@ const LoginPage = () => {
           variant="contained"
           fullWidth
           className="login-button"
-          onClick={() => handleLogin(username, password, navigate)}
+          onClick={handleSubmit}
         >
           LOGIN
         </Button>
