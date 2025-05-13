@@ -1,17 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
-  Button,
-  TextField,
-  Box,
-  Typography,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Paper,
-  Fade,
-  IconButton,
-  MenuItem,
+  Button, TextField, Box, Typography, Dialog, DialogTitle, DialogContent,
+  DialogActions, Paper, Fade, IconButton, MenuItem
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
@@ -19,34 +9,39 @@ import AddIcon from "@mui/icons-material/Add";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ErrorIcon from "@mui/icons-material/Error";
 import Webcam from "react-webcam";
-import useFacultyStore from "../../../store/useFscultyStore"; // ✅ Ensure the correct path
+import useFacultyStore from "../../../store/useFscultyStore";
 
 const defaultComplaints = [
   "Late to class",
   "Missing ID card",
   "Regulated Dress Code",
   "Misbehavior",
+  "malpractice",
   "Other",
+];
+
+const facultyList = [
+  "faculty1",
+  "faculty2",
+  "faculty3",
 ];
 
 const Logger = () => {
   const webcamRef = useRef(null);
-  const { students, fetchStudents, createLog, facultyName } = useFacultyStore();
+  const { students, fetchStudents, createLog } = useFacultyStore();
 
+  const [facultyName, setFacultyName] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredStudents, setFilteredStudents] = useState([]);
   const [entries, setEntries] = useState([]);
   const [currentStudent, setCurrentStudent] = useState({ S_ID: "", name: "" });
-
   const [timeDate, setTimeDate] = useState("");
   const [complaint, setComplaint] = useState("");
   const [comment, setComment] = useState("");
   const [venue, setVenue] = useState("");
   const [photo, setPhoto] = useState(null);
-
   const [showForm, setShowForm] = useState(false);
   const [showWebcam, setShowWebcam] = useState(false);
-
   const [modalOpen, setModalOpen] = useState(false);
   const [modalData, setModalData] = useState({ success: true, message: "" });
 
@@ -79,13 +74,32 @@ const Logger = () => {
     setShowWebcam(false);
   };
 
+  // Prevent duplicate except for "malpractice"
   const handleAddStudent = () => {
-    if (!timeDate || !venue || (complaint === "Other" && !comment)) {
+    if (!facultyName || !timeDate || !venue || (complaint === "Other" && !comment)) {
       setModalData({ success: false, message: "Please fill all required fields." });
       setModalOpen(true);
       return;
     }
-
+    if (!currentStudent.S_ID) {
+      setModalData({ success: false, message: "Please select a student." });
+      setModalOpen(true);
+      return;
+    }
+    if (
+      complaint !== "malpractice" &&
+      entries.some(
+        (e) =>
+          e.S_ID === currentStudent.S_ID &&
+          (complaint === "Other"
+            ? e.comment === comment
+            : e.comment === complaint)
+      )
+    ) {
+      setModalData({ success: false, message: "Duplicate log for this student and complaint is not allowed." });
+      setModalOpen(true);
+      return;
+    }
     setEntries([
       ...entries,
       {
@@ -94,6 +108,7 @@ const Logger = () => {
         venue,
         comment: complaint === "Other" ? comment : complaint,
         photo,
+        faculty_name: facultyName,
       },
     ]);
     setCurrentStudent({ S_ID: "", name: "" });
@@ -111,13 +126,12 @@ const Logger = () => {
       setModalOpen(true);
       return;
     }
-
     try {
       for (const entry of entries) {
         await createLog({
           S_ID: entry.S_ID,
           student_name: entry.name,
-          faculty_name: facultyName,
+          faculty_name: entry.faculty_name,
           time_date: entry.time_date,
           comment: entry.comment,
           venue: entry.venue,
@@ -160,6 +174,21 @@ const Logger = () => {
             <Typography variant="h5" textAlign="center" sx={{ mb: 2 }}>
               Create Log Entry
             </Typography>
+
+            <TextField
+              select
+              label="Faculty Name"
+              fullWidth
+              value={facultyName}
+              onChange={(e) => setFacultyName(e.target.value)}
+              sx={{ mb: 2 }}
+            >
+              {facultyList.map((f) => (
+                <MenuItem key={f} value={f}>
+                  {f}
+                </MenuItem>
+              ))}
+            </TextField>
 
             <TextField label="Search Student" fullWidth value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} sx={{ mb: 2 }} />
 
