@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
   Button, TextField, Box, Typography, Dialog, DialogTitle, DialogContent,
-  DialogActions, Paper, Fade, IconButton, MenuItem
+  DialogActions, Paper, IconButton, MenuItem, Stack
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
@@ -10,6 +10,17 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ErrorIcon from "@mui/icons-material/Error";
 import Webcam from "react-webcam";
 import useFacultyStore from "../../../store/useFscultyStore";
+import '../../../styles/logger.css';
+
+const getLocalDateTimeString = () => {
+  const date = new Date();
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, "0");
+  const day = date.getDate().toString().padStart(2, "0");
+  const hours = date.getHours().toString().padStart(2, "0");
+  const minutes = date.getMinutes().toString().padStart(2, "0");
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+};
 
 const defaultComplaints = [
   "Late to class",
@@ -20,22 +31,15 @@ const defaultComplaints = [
   "Other",
 ];
 
-const facultyList = [
-  "faculty1",
-  "faculty2",
-  "faculty3",
-];
-
-const Logger3 = () => {
+const Logger = () => {
   const webcamRef = useRef(null);
-  const { students, fetchStudents, createLog } = useFacultyStore();
-
-  const [facultyName, setFacultyName] = useState("");
+  const { students, fetchStudents, createLog, facultyName, reset, setFacultyName } = useFacultyStore();
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredStudents, setFilteredStudents] = useState([]);
   const [entries, setEntries] = useState([]);
   const [currentStudent, setCurrentStudent] = useState({ S_ID: "", name: "" });
-  const [timeDate, setTimeDate] = useState("");
+  const [studentName, setStudentName] = useState("");
+  const [timeDate, setTimeDate] = useState(getLocalDateTimeString());
   const [complaint, setComplaint] = useState("");
   const [comment, setComment] = useState("");
   const [venue, setVenue] = useState("");
@@ -46,12 +50,17 @@ const Logger3 = () => {
   const [modalData, setModalData] = useState({ success: true, message: "" });
 
   useEffect(() => {
+    const storedName = sessionStorage.getItem("facultyName");
+    if (storedName && !facultyName) {
+      setFacultyName(storedName);
+    }
     fetchStudents();
   }, []);
 
   useEffect(() => {
-    if (searchTerm.trim() === "") setFilteredStudents([]);
-    else {
+    if (searchTerm.trim() === "") {
+      setFilteredStudents([]);
+    } else {
       setFilteredStudents(
         students.filter(
           (s) =>
@@ -64,6 +73,7 @@ const Logger3 = () => {
 
   const handleSelectStudent = (student) => {
     setCurrentStudent({ S_ID: student.S_ID, name: student.name });
+    setStudentName(student.name);
     setSearchTerm("");
     setFilteredStudents([]);
   };
@@ -74,36 +84,37 @@ const Logger3 = () => {
     setShowWebcam(false);
   };
 
-  // Prevent duplicate except for "malpractice"
+  const resetFields = () => {
+    setCurrentStudent({ S_ID: "", name: "" });
+    setStudentName("");
+    setPhoto(null);
+    setComment("");
+    setComplaint("");
+    setVenue("");
+    setTimeDate(getLocalDateTimeString());
+  };
+
   const handleAddStudent = () => {
-    if (!facultyName || !timeDate || !venue || (complaint === "Other" && !comment)) {
-      setModalData({ success: false, message: "Please fill all required fields." });
-      setModalOpen(true);
-      return;
+    if (!facultyName) {
+      const storedName = sessionStorage.getItem("facultyName");
+      if (storedName) {
+        setFacultyName(storedName);
+      } else {
+        setModalData({ success: false, message: "Faculty session expired. Please login again." });
+        setModalOpen(true);
+        return;
+      }
     }
-    if (!currentStudent.S_ID) {
-      setModalData({ success: false, message: "Please select a student." });
-      setModalOpen(true);
-      return;
-    }
-    if (
-      complaint !== "malpractice" &&
-      entries.some(
-        (e) =>
-          e.S_ID === currentStudent.S_ID &&
-          (complaint === "Other"
-            ? e.comment === comment
-            : e.comment === complaint)
-      )
-    ) {
-      setModalData({ success: false, message: "Duplicate log for this student and complaint is not allowed." });
+    if (!timeDate || (complaint === "Other" && !comment)) {
+      setModalData({ success: false, message: "Please fill all required fields (marked with *)." });
       setModalOpen(true);
       return;
     }
     setEntries([
       ...entries,
       {
-        ...currentStudent,
+        S_ID: currentStudent.S_ID || null,
+        name: studentName || currentStudent.name || null,
         time_date: timeDate,
         venue,
         comment: complaint === "Other" ? comment : complaint,
@@ -111,152 +122,223 @@ const Logger3 = () => {
         faculty_name: facultyName,
       },
     ]);
-    setCurrentStudent({ S_ID: "", name: "" });
-    setPhoto(null);
+    resetFields();
   };
 
   const handleSubmit = async () => {
-    if (!facultyName) {
-      setModalData({ success: false, message: "Faculty name is missing." });
-      setModalOpen(true);
-      return;
-    }
-    if (entries.length === 0) {
-      setModalData({ success: false, message: "No entries to submit." });
+    if (!facultyName || !timeDate || (complaint === "Other" && !comment)) {
+      setModalData({ success: false, message: "Missing required fields. Please check your entries." });
       setModalOpen(true);
       return;
     }
     try {
-      for (const entry of entries) {
-        await createLog({
-          S_ID: entry.S_ID,
-          student_name: entry.name,
-          faculty_name: entry.faculty_name,
-          time_date: entry.time_date,
-          comment: entry.comment,
-          venue: entry.venue,
-          photo: entry.photo,
-        });
+      const logsToSubmit = entries.length > 0 ? entries : [{
+        S_ID: currentStudent.S_ID || null,
+        name: studentName || currentStudent.name || null,
+        time_date: timeDate,
+        venue,
+        comment: complaint === "Other" ? comment : complaint,
+        photo,
+        faculty_name: facultyName,
+      }];
+      for (const entry of logsToSubmit) {
+        await createLog(entry);
       }
-      setModalData({ success: true, message: "Log(s) created successfully!" });
+      setModalData({ success: true, message: "Log(s) submitted successfully!" });
       setEntries([]);
-      setTimeDate("");
-      setComment("");
-      setVenue("");
-      setComplaint("");
+      resetFields();
+      reset();
       setShowForm(false);
     } catch (error) {
-      setModalData({ success: false, message: "Error submitting logs." });
+      setModalData({ success: false, message: "Submission failed. Please try again." });
     } finally {
       setModalOpen(true);
     }
   };
 
-  const getMinDateTime = () => {
-    const now = new Date();
-    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-    return now.toISOString().slice(0, 16);
-  };
-
   return (
-    <Box sx={{ p: 3, width: "100%", minHeight: "calc(100vh - 64px)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "#f9f9f9", position: "relative" }}>
-      <Button variant="contained" color="primary" onClick={() => setShowForm(true)} sx={{ position: "fixed", top: 100, right: 40, zIndex: 1000 }}>
-        + CREATE
+    <Box
+      sx={{
+        p: 3,
+        width: "100%",
+        maxWidth: 1200,
+        margin: "0 auto",
+        minHeight: "calc(100vh - 64px)",
+        background: "#f9f9f9",
+        position: "relative",
+      }}
+      className="logger-container"
+    >
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={() => setShowForm(true)}
+        startIcon={<AddIcon />}
+        className="create-button"
+        sx={{
+          position: "fixed",
+          top: 88,
+          right: 40,
+          zIndex: 1201
+        }}
+      >
+        CREATE
       </Button>
 
       {showForm && (
-        <Box sx={{ width: "100%", display: "flex", justifyContent: "center", alignItems: "center", marginLeft: "200px", mt: 8 }}>
-          <Paper sx={{ p: 3, width: "100%", maxWidth: 600, borderRadius: 4, backgroundColor: "#fff", position: "relative" }}>
-            <IconButton onClick={() => setShowForm(false)} sx={{ position: "absolute", top: 10, left: 10, color: "black" }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "flex-start",
+            width: "100%",
+            minHeight: "calc(100vh - 120px)",
+          }}
+        >
+          <Paper
+            elevation={3}
+            className="logger-form"
+            sx={{
+              mt: 8,
+              maxWidth: 630,
+              width: "100%",
+              borderRadius: 3,
+              boxShadow: 4,
+              background: "#fff",
+              position: "relative",
+              marginLeft: "240px",
+            }}
+          >
+            <IconButton onClick={() => setShowForm(false)} sx={{ position: "absolute", top: 8, right: 8 }}>
               <CloseIcon />
             </IconButton>
 
-            <Typography variant="h5" textAlign="center" sx={{ mb: 2 }}>
+            <Typography variant="h6" gutterBottom>
               Create Log Entry
             </Typography>
 
             <TextField
-              select
-              label="Faculty Name"
+              label="Search Student"
               fullWidth
-              value={facultyName}
-              onChange={(e) => setFacultyName(e.target.value)}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               sx={{ mb: 2 }}
-            >
-              {facultyList.map((f) => (
-                <MenuItem key={f} value={f}>
-                  {f}
-                </MenuItem>
-              ))}
-            </TextField>
-
-            <TextField label="Search Student" fullWidth value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} sx={{ mb: 2 }} />
-
+            />
             {filteredStudents.length > 0 && (
-              <Paper sx={{ maxHeight: 150, overflowY: "auto", mb: 2, backgroundColor: "#fff" }}>
+              <Box className="suggestion-box">
                 {filteredStudents.map((s) => (
-                  <Fade in key={s.S_ID}>
-                    <Box p={1} onClick={() => handleSelectStudent(s)} sx={{ cursor: "pointer", ":hover": { background: "#eee" } }}>
-                      {s.S_ID} - {s.name}
-                    </Box>
-                  </Fade>
+                  <div
+                    key={s.S_ID}
+                    onClick={() => handleSelectStudent(s)}
+                  >
+                    {s.S_ID} - {s.name}
+                  </div>
                 ))}
-              </Paper>
+              </Box>
             )}
 
-            <TextField label="Register Number" fullWidth value={currentStudent.S_ID} disabled sx={{ mb: 2 }} />
-            <TextField label="Student Name" fullWidth value={currentStudent.name} disabled sx={{ mb: 2 }} />
-            <TextField type="datetime-local" fullWidth value={timeDate} onChange={(e) => setTimeDate(e.target.value)} inputProps={{ min: getMinDateTime() }} sx={{ mb: 2 }} />
+            <TextField
+              label="Register Number"
+              fullWidth
+              value={currentStudent.S_ID}
+              disabled
+              sx={{ mb: 2 }}
+            />
 
-            <TextField select fullWidth label="Select Complaint" value={complaint} onChange={(e) => setComplaint(e.target.value)} sx={{ mb: 2 }}>
-              {defaultComplaints.map((option) => (
-                <MenuItem key={option} value={option}>
-                  {option}
+            <TextField
+              label="Student Name"
+              fullWidth
+              value={studentName}
+              onChange={(e) => setStudentName(e.target.value)}
+              sx={{ mb: 2 }}
+            />
+
+            <TextField
+              label="Current Date & Time *"
+              type="datetime-local"
+              fullWidth
+              InputLabelProps={{ shrink: true }}
+              inputProps={{ min: getLocalDateTimeString() }}
+              value={timeDate}
+              onChange={(e) => setTimeDate(e.target.value)}
+              sx={{ mb: 2 }}
+            />
+
+            <TextField
+              label="Venue"
+              fullWidth
+              value={venue}
+              onChange={(e) => setVenue(e.target.value)}
+              sx={{ mb: 2 }}
+            />
+
+            <TextField
+              select
+              label="Complaint *"
+              fullWidth
+              value={complaint}
+              onChange={(e) => setComplaint(e.target.value)}
+              sx={{ mb: 2 }}
+            >
+              {defaultComplaints.map((c) => (
+                <MenuItem key={c} value={c}>
+                  {c}
                 </MenuItem>
               ))}
             </TextField>
 
             {complaint === "Other" && (
-              <TextField label="Custom Comment" multiline rows={3} fullWidth value={comment} onChange={(e) => setComment(e.target.value)} sx={{ mb: 2 }} />
+              <TextField
+                label="Custom Complaint *"
+                fullWidth
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                sx={{ mb: 2 }}
+              />
             )}
 
-            <TextField label="Venue" fullWidth value={venue} onChange={(e) => setVenue(e.target.value)} sx={{ mb: 2 }} />
+            {photo && (
+              <img src={photo} alt="Captured" style={{ width: "100%", marginBottom: "10px" }} />
+            )}
 
             {showWebcam && (
-              <Box sx={{ mb: 2 }}>
-                <Webcam audio={false} ref={webcamRef} screenshotFormat="image/jpeg" width="100%" />
-                <Button startIcon={<CameraAltIcon />} onClick={handleCapture} fullWidth variant="outlined" sx={{ my: 1 }}>
-                  Capture ID Card
+              <>
+                <Webcam ref={webcamRef} screenshotFormat="image/jpeg" style={{ width: "100%" }} />
+                <Button onClick={handleCapture} variant="contained" fullWidth sx={{ mt: 1 }}>
+                  Capture
                 </Button>
-              </Box>
+              </>
             )}
 
-            <Button startIcon={<AddIcon />} variant="contained" fullWidth onClick={handleAddStudent} sx={{ mb: 2 }}>
+            <Button onClick={handleAddStudent} variant="contained" fullWidth sx={{ mt: 2, mb: 2 }}>
               Add Student to Complaint
             </Button>
 
-            {entries.length > 0 && <Typography sx={{ mb: 1 }}>{entries.length} student(s) added</Typography>}
-
-            <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
-              <Button variant="outlined" onClick={() => setShowWebcam(true)} sx={{ flex: 1, mr: 1 }}>
-                Upload ID
+            <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
+              <Button
+                startIcon={<CameraAltIcon />}
+                onClick={() => setShowWebcam(true)}
+                variant="outlined"
+                fullWidth
+              >
+                Upload Photo
               </Button>
-              <Button variant="contained" color="primary" onClick={handleSubmit} sx={{ flex: 1 }}>
+              <Button
+                onClick={handleSubmit}
+                variant="contained"
+                color="primary"
+                fullWidth
+              >
                 Submit
               </Button>
-            </Box>
+            </Stack>
           </Paper>
         </Box>
       )}
 
       <Dialog open={modalOpen} onClose={() => setModalOpen(false)}>
         <DialogTitle>
-          {modalData.success ? (
-            <CheckCircleIcon color="success" sx={{ verticalAlign: "middle", mr: 1 }} />
-          ) : (
-            <ErrorIcon color="error" sx={{ verticalAlign: "middle", mr: 1 }} />
-          )}
-          Status
+          {modalData.success ? <CheckCircleIcon color="success" /> : <ErrorIcon color="error" />} Message
         </DialogTitle>
         <DialogContent>
           <Typography>{modalData.message}</Typography>
@@ -269,4 +351,4 @@ const Logger3 = () => {
   );
 };
 
-export default Logger3;
+export default Logger;

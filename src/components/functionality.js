@@ -3,7 +3,7 @@ import { auth, provider } from "../pages/firebase";
 import useFacultyStore from "../store/useFscultyStore"; // ✅ Fixed typo in filename
 
 export const handleLogin = (username, password, navigate) => {
-  const setFacultyName = useFacultyStore.getState().setFacultyName; // ✅ Zustand state outside React components
+  const setFacultyName = useFacultyStore.getState().setFacultyName;
 
   if (username === "Rahul K" && password === "pass1") {
     navigate("/student1_1");
@@ -18,15 +18,18 @@ export const handleLogin = (username, password, navigate) => {
   } else if (username === "admin" && password === "adminpass") {
     navigate("/admin1");
   } else if (username === "faculty1" && password === "pass-1") {
-    setFacultyName("faculty1"); // ✅ Set Zustand state
+    setFacultyName("faculty1");
+    sessionStorage.setItem('facultyName', 'faculty1');
     navigate("/logger");
   } else if (username === "faculty2" && password === "pass-2") {
     setFacultyName("faculty2");
+    sessionStorage.setItem('facultyName', 'faculty2');
     navigate("/logger2");
   } else if (username === "faculty3" && password === "pass-3") {
     setFacultyName("faculty3");
+    sessionStorage.setItem('facultyName', 'faculty3');
     navigate("/logger3");
-  } else if (username === "support" && password === "support-1") {
+  }else if (username === "support" && password === "support-1") {
     navigate("/supportdesk");
   } else {
     alert("Invalid Credentials!");
