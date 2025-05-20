@@ -1,4 +1,3 @@
-// useFacultyStore.js
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import axios from "axios";
@@ -21,17 +20,19 @@ const useFacultyStore = create(
         }
       },
       setFacultyName: (name) => set({ facultyName: name }),
+      // Throw error to handle in frontend
       createLog: async (logData) => {
         try {
           await axios.post("http://localhost:5000/api/log-entry", logData);
         } catch (error) {
-          console.error("Error creating log entry:", error);
+          // Throw error to be handled in Logger.js
+          throw error;
         }
       },
       reset: () => set({ ...initialState, facultyName: sessionStorage.getItem("facultyName") || "" }),
     }),
     {
-      name: "faculty-store", // unique name
+      name: "faculty-store",
       storage: createJSONStorage(() => sessionStorage),
     }
   )

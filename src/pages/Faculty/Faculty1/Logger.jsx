@@ -114,7 +114,7 @@ const Logger = () => {
       ...entries,
       {
         S_ID: currentStudent.S_ID || null,
-        name: studentName || currentStudent.name || null,
+        student_name: studentName || currentStudent.name || null,
         time_date: timeDate,
         venue,
         comment: complaint === "Other" ? comment : complaint,
@@ -125,6 +125,7 @@ const Logger = () => {
     resetFields();
   };
 
+  // Updated handleSubmit to show duplicate error
   const handleSubmit = async () => {
     if (!facultyName || !timeDate || (complaint === "Other" && !comment)) {
       setModalData({ success: false, message: "Missing required fields. Please check your entries." });
@@ -134,15 +135,30 @@ const Logger = () => {
     try {
       const logsToSubmit = entries.length > 0 ? entries : [{
         S_ID: currentStudent.S_ID || null,
-        name: studentName || currentStudent.name || null,
+        student_name: studentName || currentStudent.name || null,
         time_date: timeDate,
         venue,
         comment: complaint === "Other" ? comment : complaint,
         photo,
         faculty_name: facultyName,
       }];
+
+      // Submit each log and handle duplicate error
       for (const entry of logsToSubmit) {
-        await createLog(entry);
+        try {
+          await createLog(entry);
+        } catch (error) {
+          // If it's a duplicate (409), show the message and stop further submission
+          if (error?.response?.status === 409) {
+            setModalData({ success: false, message: "This complaint has already been logged." });
+            setModalOpen(true);
+            return;
+          } else {
+            setModalData({ success: false, message: "Submission failed. Please try again." });
+            setModalOpen(true);
+            return;
+          }
+        }
       }
       setModalData({ success: true, message: "Log(s) submitted successfully!" });
       setEntries([]);
@@ -151,7 +167,6 @@ const Logger = () => {
       setShowForm(false);
     } catch (error) {
       setModalData({ success: false, message: "Submission failed. Please try again." });
-    } finally {
       setModalOpen(true);
     }
   };
