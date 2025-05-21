@@ -11,7 +11,9 @@ import {
   DialogActions,
   Slide,
   Grid,
+  IconButton,
 } from "@mui/material";
+import CameraAltIcon from "@mui/icons-material/CameraAlt";
 
 // Slide transition for modal
 const Transition = forwardRef(function Transition(props, ref) {
@@ -22,6 +24,8 @@ const Forward = () => {
   const [logs, setLogs] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
+  const [photoOpen, setPhotoOpen] = useState(false);
+  const [selectedPhoto, setSelectedPhoto] = useState("");
 
   useEffect(() => {
     axios
@@ -44,6 +48,7 @@ const Forward = () => {
       Venue: log.venue,
       Comment: log.comment,
       faculty: log.faculty,
+      photo: log.photo,
     };
 
     axios
@@ -62,16 +67,29 @@ const Forward = () => {
     setModalOpen(false);
   };
 
+  const handlePhotoView = (photo) => {
+    setSelectedPhoto(photo);
+    setPhotoOpen(true);
+  };
+
+  const handlePhotoClose = () => {
+    setPhotoOpen(false);
+    setSelectedPhoto("");
+  };
+
   return (
-    <Box sx={{ p: 4, ml: { xs: '70px', sm: '70px' } }}>
-      <Typography variant="h4" sx={{ mb: 4, fontWeight: "bold" ,marginTop: "0px", marginLeft:"300px"}}>
+    <Box sx={{ p: 4, ml: { xs: "70px", sm: "70px" } }}>
+      <Typography
+        variant="h4"
+        sx={{ mb: 4, fontWeight: "bold", marginTop: "0px", marginLeft: "300px" }}
+      >
         Forward Complaints to Admin
       </Typography>
 
       {logs.length === 0 ? (
         <Typography>No complaints found.</Typography>
       ) : (
-        <Grid container spacing={3} >
+        <Grid container spacing={3}>
           {logs.map((log) => (
             <Grid item xs={12} sm={6} md={4} key={log.id}>
               <Paper
@@ -84,12 +102,21 @@ const Forward = () => {
                   justifyContent: "space-between",
                   borderRadius: 3,
                   transition: "transform 0.3s",
+                  position: "relative",
                   "&:hover": {
                     transform: "translateY(-5px)",
                     boxShadow: "0 6px 20px rgba(0,0,0,0.1)",
                   },
                 }}
               >
+                {/* Camera Icon for photo preview */}
+                <IconButton
+                  onClick={() => handlePhotoView(log.photo)}
+                  sx={{ position: "absolute", top: 8, right: 8 }}
+                >
+                  <CameraAltIcon />
+                </IconButton>
+
                 <Box>
                   <Typography variant="subtitle2" color="textSecondary">
                     ID: {log.id}
@@ -122,13 +149,8 @@ const Forward = () => {
         </Grid>
       )}
 
-      {/* Animated Modal */}
-      <Dialog
-        open={modalOpen}
-        onClose={handleClose}
-        TransitionComponent={Transition}
-        keepMounted
-      >
+      {/* Notification Modal */}
+      <Dialog open={modalOpen} onClose={handleClose} TransitionComponent={Transition} keepMounted>
         <DialogTitle>Notification</DialogTitle>
         <DialogContent>
           <Typography>{modalMessage}</Typography>
@@ -136,6 +158,27 @@ const Forward = () => {
         <DialogActions>
           <Button onClick={handleClose} variant="contained">
             OK
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Photo Preview Modal */}
+      <Dialog open={photoOpen} onClose={handlePhotoClose}>
+        <DialogTitle>Student Photo</DialogTitle>
+        <DialogContent>
+          {selectedPhoto ? (
+            <img
+              src={`http://localhost:5000/uploads/${selectedPhoto}`}
+              alt="Student"
+              style={{ maxWidth: "100%", borderRadius: "10px" }}
+            />
+          ) : (
+            <Typography>No photo available</Typography>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handlePhotoClose} variant="contained">
+            Close
           </Button>
         </DialogActions>
       </Dialog>

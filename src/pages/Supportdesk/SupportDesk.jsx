@@ -10,11 +10,10 @@ import {
   DialogContent,
   DialogActions,
   Slide,
-  TextField,  // Added for description input
+  TextField,
 } from "@mui/material";
 import "../../styles/Supportdesk.css";
 
-// Slide animation for modal
 const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
@@ -25,11 +24,11 @@ const SupportDesk = () => {
   const [editingId, setEditingId] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
-  const [description, setDescription] = useState({}); // Store description for each log
+  const [description, setDescription] = useState({});
 
   useEffect(() => {
     fetchSupportLogs();
-  }, []);
+  }, [fetchSupportLogs]);
 
   const handleEdit = (id) => {
     setEditingId(id);
@@ -42,20 +41,24 @@ const SupportDesk = () => {
       return;
     }
 
-    if (!description[id] || description[id].trim() === "") {
+    if (!description[id]?.trim()) {
       setModalMessage("Please provide a description before sending");
       setModalOpen(true);
       return;
     }
 
-    await sendToMentor(id, selectedVideo[id], description[id]);
-    setEditingId(null);
-    setSelectedVideo((prev) => ({ ...prev, [id]: null }));
-    setDescription((prev) => ({ ...prev, [id]: "" })); // Reset description
-    fetchSupportLogs();
-
-    setModalMessage("Video and description sent to mentor successfully!");
-    setModalOpen(true);
+    try {
+      await sendToMentor(id, selectedVideo[id], description[id]);
+      setModalMessage("Video and description sent to mentor successfully!");
+    } catch (error) {
+      setModalMessage("Failed to send to mentor. Please try again.");
+    } finally {
+      setModalOpen(true);
+      setEditingId(null);
+      setSelectedVideo(prev => ({ ...prev, [id]: null }));
+      setDescription(prev => ({ ...prev, [id]: "" }));
+      fetchSupportLogs();
+    }
   };
 
   const handleCloseModal = () => {
@@ -63,14 +66,14 @@ const SupportDesk = () => {
   };
 
   const getStatusClass = (status) => {
-    if (status === "Accepted") return "accepted";
-    if (status === "Declined") return "declined";
-    return "pending";
+    return status.toLowerCase() === "accepted" ? "accepted" 
+      : status.toLowerCase() === "declined" ? "declined" 
+      : "pending";
   };
 
   return (
     <Box sx={{ p: 4 }}>
-      <Typography variant="h4" sx={{ mb: 3, marginTop: "100px", marginLeft: "190px",padding: "-50px", }}>
+      <Typography variant="h4" sx={{ mb: 3, mt: 10, ml: 19, p: "-50px" }}>
         Support Desk - Unassigned Complaints
       </Typography>
 
@@ -78,92 +81,93 @@ const SupportDesk = () => {
         <Typography>No unassigned logs found.</Typography>
       ) : (
         <div className="complaints-container">
-          {logs.map((log) => {
-            const status = log.status || "Pending";
-            const statusClass = getStatusClass(status);
+          {logs.map((log) => (
+            <Box 
+              key={log.complaint_id}
+              className={`complaint-card ${getStatusClass(log.status || "pending")}`}
+              sx={{ mb: 3, p: 3, ml: 4 }}
+            >
+              <Typography className={`status-label status-${(log.status || "pending").toLowerCase()}`}>
+                {log.status || "Pending"}
+              </Typography>
+              <Typography><b>ID:</b> {log.complaint_id}</Typography>
+              <Typography><b>Time:</b> {log.time_date}</Typography>
+              <Typography><b>Complaint:</b> {log.comment}</Typography>
+              <Typography><b>Venue:</b> {log.venue}</Typography>
 
-            return (
-              <Box key={log.complaint_id} 
-              className={`complaint-card ${statusClass}`}
-              sx={{ mb: 3, padding: "30px", marginLeft: "40px" }}
-              >
-                <Typography className={`status-label status-${status.toLowerCase()}`}>
-                  {status}
-                </Typography>
-                <Typography><b>ID:</b> {log.complaint_id}</Typography>
-                <Typography><b>Time:</b> {log.time_date}</Typography>
-                <Typography><b>Complain:</b> {log.comment}</Typography>
-                <Typography><b>Venue:</b> {log.venue}</Typography>
+              {editingId === log.complaint_id && (
+                <Box sx={{ mt: 2 }}>
+                  <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                    Upload Response Video:
+                  </Typography>
 
-                {editingId === log.complaint_id && (
-                  <Box sx={{ mt: 2 }}>
-                    <Typography variant="subtitle1" sx={{ mb: 1 }}>
-                      Upload Response Video:
-                    </Typography>
+                  <Input
+                    type="file"
+                    accept="video/*"
+                    onChange={(e) => setSelectedVideo(prev => ({
+                      ...prev,
+                      [log.complaint_id]: e.target.files[0]
+                    }))}
+                  />
 
-                    <Input
-                      type="file"
-                      accept="video/*"
-                      onChange={(e) =>
-                        setSelectedVideo((prev) => ({
-                          ...prev,
-                          [log.complaint_id]: e.target.files[0],
-                        }))
-                      }
-                    />
+                  {selectedVideo[log.complaint_id] && (
+                    <Box sx={{ mt: 2 }}>
+                      <video
+                        controls
+                        width="100%"
+                        style={{ maxHeight: 300 }}
+                        src={URL.createObjectURL(selectedVideo[log.complaint_id])}
+                      />
+                    </Box>
+                  )}
 
-                    {selectedVideo[log.complaint_id] && (
-                      <Box sx={{ mt: 2 }}>
-                        <Typography variant="body2">Preview:</Typography>
-                        <video
-                          controls
-                          width="100%"
-                          style={{ maxHeight: 300 }}
-                          src={URL.createObjectURL(selectedVideo[log.complaint_id])}
-                        />
-                      </Box>
-                    )}
-
-                    {/* Added description input */}
-                    <TextField
-                      label="Description"
-                      multiline
-                      rows={4}
-                      fullWidth
-                      value={description[log.complaint_id] || ""}
-                      onChange={(e) =>
-                        setDescription((prev) => ({
-                          ...prev,
-                          [log.complaint_id]: e.target.value,
-                        }))
-                      }
-                      sx={{ mt: 2 }}
-                    />
-                  </Box>
-                )}
-
-                <Box className="complaint-buttons">
-                  <button className="accept-button" onClick={() => handleEdit(log.complaint_id)}>
-                    Edit
-                  </button>
-                  <button className="decline-button" onClick={() => handleSend(log.complaint_id)}>
-                    Send
-                  </button>
+                  <TextField
+                    label="Description"
+                    multiline
+                    rows={4}
+                    fullWidth
+                    value={description[log.complaint_id] || ""}
+                    onChange={(e) => setDescription(prev => ({
+                      ...prev,
+                      [log.complaint_id]: e.target.value
+                    }))}
+                    sx={{ mt: 2 }}
+                  />
                 </Box>
+              )}
+
+              <Box className="complaint-buttons">
+                <button 
+                  className="accept-button" 
+                  onClick={() => handleEdit(log.complaint_id)}
+                >
+                  Edit
+                </button>
+                <button 
+                  className="decline-button" 
+                  onClick={() => handleSend(log.complaint_id)}
+                >
+                  Send
+                </button>
               </Box>
-            );
-          })}
+            </Box>
+          ))}
         </div>
       )}
 
-      {/* Modal for alerts with animation */}
-      <Dialog open={modalOpen} TransitionComponent={Transition} keepMounted onClose={handleCloseModal}>
+      <Dialog 
+        open={modalOpen} 
+        TransitionComponent={Transition} 
+        onClose={handleCloseModal}
+      >
         <DialogTitle>Notification</DialogTitle>
         <DialogContent>
           <Typography>{modalMessage}</Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseModal} variant="contained">OK</Button>
+          <Button onClick={handleCloseModal} variant="contained">
+            OK
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>
