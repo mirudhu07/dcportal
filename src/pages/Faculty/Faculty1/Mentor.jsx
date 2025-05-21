@@ -19,14 +19,13 @@ const Mentor = () => {
   const [showForm, setShowForm] = useState(false);
   const [selectedComplaint, setSelectedComplaint] = useState(null);
   const [formData, setFormData] = useState({ S_ID: "", student_name: "" });
-
   const [modalOpen, setModalOpen] = useState(false);
   const [modalData, setModalData] = useState({ success: true, message: "" });
 
   useEffect(() => {
-    axios.get("http://localhost:5000/api/mentor-queue").then((res) => {
-      setQueue(res.data);
-    });
+    axios.get("http://localhost:5000/api/mentor-queue")
+      .then((res) => setQueue(res.data))
+      .catch(err => console.error("Fetch error:", err));
   }, []);
 
   const handleYes = (complaint) => {
@@ -46,9 +45,12 @@ const Mentor = () => {
       setModalOpen(true);
       setShowForm(false);
       setFormData({ S_ID: "", student_name: "" });
+      // Refresh queue after submission
+      axios.get("http://localhost:5000/api/mentor-queue")
+        .then((res) => setQueue(res.data));
     } catch (err) {
       console.error("Submit failed:", err);
-      setModalData({ success: false, message: "Failed to submit. Check console for error." });
+      setModalData({ success: false, message: err.response?.data?.error || "Submission failed" });
       setModalOpen(true);
     }
   };
@@ -58,13 +60,23 @@ const Mentor = () => {
       <h2>Mentor</h2>
 
       <div className="cards-container">
-        {queue.map((item, idx) => (
-          <div key={idx} className="card">
-            <video controls src={`http://localhost:5000/${item.video_path}`} />
+        {queue.map((item) => (
+          <div key={item.complaint_id} className="card">
+            <video 
+              controls 
+              src={`http://localhost:5000/${item.video_path}`}
+              style={{ maxHeight: "300px" }}
+            />
             <div className="info">
-              <p>Complaint ID: {item.complaint_id}</p>
-              <button className="yes" onClick={() => handleYes(item)}>Yes</button>
-              <button className="no">No</button>
+              <p><strong>Complaint ID:</strong> {item.complaint_id}</p>
+              {/* Added description display */}
+              <p><strong>Description:</strong> {item.description}</p>
+              <div className="button-group">
+                <button className="yes" onClick={() => handleYes(item)}>
+                  Yes
+                </button>
+                <button className="no">No</button>
+              </div>
             </div>
           </div>
         ))}
@@ -72,7 +84,6 @@ const Mentor = () => {
 
       {showForm && (
         <div className="popup-form">
-          {/* Close Icon with custom class */}
           <IconButton className="close-icon" onClick={() => setShowForm(false)}>
             <CloseIcon />
           </IconButton>
@@ -83,18 +94,21 @@ const Mentor = () => {
             placeholder="Student Name"
             value={formData.student_name}
             onChange={(e) => setFormData({ ...formData, student_name: e.target.value })}
+            required
           />
           <input
             type="text"
             placeholder="Roll Number"
             value={formData.S_ID}
             onChange={(e) => setFormData({ ...formData, S_ID: e.target.value })}
+            required
           />
-          <button className="submit-button" onClick={handleSubmit}>Submit</button>
+          <button className="submit-button" onClick={handleSubmit}>
+            Submit
+          </button>
         </div>
       )}
 
-      {/* Modal */}
       <Dialog open={modalOpen} onClose={() => setModalOpen(false)}>
         <DialogTitle>Status</DialogTitle>
         <DialogContent sx={{ textAlign: "center" }}>
@@ -106,7 +120,9 @@ const Mentor = () => {
           <Typography sx={{ mt: 2 }}>{modalData.message}</Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setModalOpen(false)} variant="contained">OK</Button>
+          <Button onClick={() => setModalOpen(false)} variant="contained">
+            OK
+          </Button>
         </DialogActions>
       </Dialog>
     </div>
